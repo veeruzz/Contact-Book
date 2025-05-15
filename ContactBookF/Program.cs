@@ -3,18 +3,22 @@ namespace ContactBookF;
 
 public class ContactBookF
 {
+    // List to store all contact entries
     List<Contact> contacts;
+    // Number of contacts to display per page when listing
     int itemsPerPage;
-    public ContactBookF()
 
+    // Constructor initializes contacts list, sets items per page, and starts UI
+    public ContactBookF()
     {
         contacts = new List<Contact>();
         itemsPerPage = 10;
 
-
         WelcomeScreen();
         MainMenu();
     }
+
+    // Displays welcome message with program info and waits for user to continue
     public void WelcomeScreen()
     {
         string welcome = @"
@@ -34,6 +38,8 @@ public class ContactBookF
         Console.WriteLine(welcome);
         PressEnterToContinue();
     }
+
+    // Displays main menu options and handles user selection with a loop
     public void MainMenu()
     {
         string menu = @"
@@ -63,13 +69,11 @@ public class ContactBookF
             }
             else if (option == 3)
             {
-
                 AddNewContact();
                 ShowAllContacts();
             }
             else if (option == 4)
             {
-
                 EditContact();
             }
             else if (option == 5)
@@ -78,7 +82,6 @@ public class ContactBookF
             }
             else if (option == 6)
             {
-
                 MergeDuplicatedContacts();
             }
             else if (option == 7)
@@ -90,10 +93,11 @@ public class ContactBookF
                 Exit();
             }
 
-
         } while (option != 8);
         PressEnterToContinue();
     }
+
+    // Prompts user for filename and loads contacts from it
     public void LoadEntriesFromFile()
     {
         Console.Clear();
@@ -105,6 +109,7 @@ public class ContactBookF
         LoadEntriesFromFile(filename);
     }
 
+    // Loads contacts from the specified file, adding valid entries to the list
     public void LoadEntriesFromFile(string filename)
     {
         if (string.IsNullOrEmpty(filename))
@@ -130,10 +135,11 @@ public class ContactBookF
                     string phoneNumber = sr.ReadLine();
                     string email = sr.ReadLine();
 
-                    // Skip empty lines to avoid errors
-                    if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) || string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(email))
+                    // Skip incomplete entries to avoid errors
+                    if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName) ||
+                        string.IsNullOrEmpty(phoneNumber) || string.IsNullOrEmpty(email))
                     {
-                        continue; // Skip the current set of data if any part is missing
+                        continue;
                     }
 
                     Contact e = new Contact
@@ -161,9 +167,9 @@ public class ContactBookF
         }
     }
 
+    // Displays all contacts with sorting and pagination options
     public void ShowAllContacts()
     {
-        // Ordenar antes de mostrar
         Console.Clear();
         Console.WriteLine("Sort by [1] Name [2] Last Name [3] Phone Number [4] E-mail:");
         int sortOption = GetOption("Choose sort option: ", 1, 4);
@@ -221,7 +227,7 @@ public class ContactBookF
                 Console.WriteLine($"{index}  {name,-18} {lastName,-18} {phone,-13} {email}");
             }
 
-
+            // Fill empty lines if the last page is not full
             for (int i = 0; i < itemsPerPage - (limit - offset); i++)
             {
                 Console.WriteLine();
@@ -243,7 +249,7 @@ public class ContactBookF
         } while (page != 0);
     }
 
-
+    // Prompts user to enter new contact details and validates input before adding
     public void AddNewContact()
     {
         Console.Clear();
@@ -251,6 +257,7 @@ public class ContactBookF
         Console.WriteLine(@"### Add New Contact ###
 ");
 
+        // Ensure at least one of first or last name is provided
         do
         {
             Console.WriteLine("Enter First Name: ");
@@ -265,7 +272,7 @@ public class ContactBookF
 
         } while (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(lastName));
 
-
+        // Validate phone number length or presence of email
         do
         {
             Console.WriteLine("Enter Phone Number (max 10 digits): ");
@@ -283,7 +290,7 @@ public class ContactBookF
 
         } while ((string.IsNullOrEmpty(phoneNumber) && string.IsNullOrEmpty(email)) || phoneNumber.Length > 10);
 
-
+        // Confirm addition
         string option = GetOption("Answer [Y] to apply changes or [N] to cancel: ", "Y", "N");
         if (option == "Y")
         {
@@ -293,7 +300,6 @@ public class ContactBookF
                 lastName = lastName,
                 phoneNumber = phoneNumber,
                 email = email
-
             };
             contacts.Add(e);
 
@@ -305,6 +311,7 @@ public class ContactBookF
         }
     }
 
+    // Starts the process of editing a contact either by index or by searching a field
     public void EditContact()
     {
         Console.Clear();
@@ -318,9 +325,7 @@ public class ContactBookF
 
         if (option == 1)
         {
-
             EditContactByIndex();
-
         }
         else if (option == 2)
         {
@@ -328,6 +333,7 @@ public class ContactBookF
         }
     }
 
+    // Lists contacts with indices and prompts user to select one for editing by index
     public void EditContactByIndex()
     {
         Console.Clear();
@@ -343,6 +349,7 @@ public class ContactBookF
         EditContact(index);
     }
 
+    // Searches contacts by first or last name and allows user to select one to edit
     public void EditContactByField()
     {
         Console.WriteLine("Enter the first name or last name of the contact to search for:");
@@ -366,23 +373,29 @@ public class ContactBookF
         EditContact(contacts.IndexOf(foundContacts[selectedContactIndex]));
     }
 
+
+    // Edita un contacto en la posición especificada del listado
     public void EditContact(int index)
     {
+        // Obtiene el contacto seleccionado por índice
         Contact e = contacts[index];
+
+        // Muestra la información actual del contacto
         string text = $"[{index.ToString().PadLeft(3, '0')}]\nFirst Name: {e.firstName}\nLast Name: {e.lastName}\nPhone Number: {e.phoneNumber}\nEmail: {e.email}";
         Console.WriteLine(text);
+
+        // Opciones para seleccionar qué campo editar o cancelar
         Console.WriteLine("[0] First Name [1] Last Name [2] Phone Number [3] Email [4] Cancel");
         int option = GetOption("Which property do you wish to edit? ", 0, 4);
 
+        // Dependiendo de la opción elegida, solicita el nuevo valor o cancela
         if (option == 0)
         {
             Console.WriteLine("Enter new first name or nothing to cancel: ");
             string firstName = Console.ReadLine();
 
             if (string.IsNullOrEmpty(firstName))
-            {
                 Console.WriteLine("Edit was canceled");
-            }
             else
             {
                 Console.WriteLine("Edit was successful");
@@ -395,9 +408,7 @@ public class ContactBookF
             string lastName = Console.ReadLine();
 
             if (string.IsNullOrEmpty(lastName))
-            {
                 Console.WriteLine("Edit was canceled");
-            }
             else
             {
                 Console.WriteLine("Edit was successful");
@@ -410,9 +421,7 @@ public class ContactBookF
             string phoneNumber = Console.ReadLine();
 
             if (string.IsNullOrEmpty(phoneNumber))
-            {
                 Console.WriteLine("Edit was canceled");
-            }
             else
             {
                 Console.WriteLine("Edit was successful");
@@ -425,9 +434,7 @@ public class ContactBookF
             string email = Console.ReadLine();
 
             if (string.IsNullOrEmpty(email))
-            {
                 Console.WriteLine("Edit was canceled");
-            }
             else
             {
                 Console.WriteLine("Edit was successful");
@@ -436,13 +443,17 @@ public class ContactBookF
         }
         else
         {
+            // Opción 4: cancelar edición
             Console.WriteLine("Edit was canceled");
         }
     }
+
+    // Inicia el proceso para eliminar un contacto mostrando la lista
     public void DeleteContact()
     {
         Console.Clear();
 
+        // Si no hay contactos, informa y regresa al menú
         if (contacts.Count == 0)
         {
             Console.WriteLine("No contacts found. Press any key to return to the menu...");
@@ -452,6 +463,7 @@ public class ContactBookF
 
         Console.WriteLine("### Delete Existing Contact ###\n");
 
+        // Muestra todos los contactos con índice y datos principales
         for (int i = 0; i < contacts.Count; i++)
         {
             Contact c = contacts[i];
@@ -461,6 +473,7 @@ public class ContactBookF
         int s = 0;
         int e = contacts.Count - 1;
 
+        // Solicita el índice del contacto a eliminar o cancelar (-1)
         int index = GetOption($"Choose index of contact to delete [{s}-{e}] or [-1] to cancel: ", -1, e);
 
         if (index == -1)
@@ -470,13 +483,16 @@ public class ContactBookF
             return;
         }
 
+        // Llama a la sobrecarga que elimina contacto por índice
         DeleteContact(index);
     }
 
+    // Elimina un contacto específico por índice, con confirmación del usuario
     public void DeleteContact(int index)
     {
         Contact c = contacts[index];
 
+        // Confirma si se desea eliminar el contacto
         string option = GetOption("Are you sure you want to remove this contact? [Y/N]: ", "Y", "N");
 
         if (option.ToUpper() == "Y")
@@ -491,16 +507,16 @@ public class ContactBookF
 
         Console.WriteLine("Press any key to return to the menu...");
         Console.ReadKey();
-
     }
 
-
+    // Guarda la lista actual de contactos en un archivo de texto
     public void SaveContact()
     {
         Console.Clear();
         Console.WriteLine("Enter the file name to save entries (or press Enter to cancel):");
         string filename = Console.ReadLine();
 
+        // Si no se ingresa nombre de archivo, cancela la operación
         if (string.IsNullOrWhiteSpace(filename))
         {
             Console.WriteLine("Operation canceled.");
@@ -509,6 +525,7 @@ public class ContactBookF
 
         try
         {
+            // Escribe cada campo de cada contacto en líneas separadas
             using (StreamWriter sw = new StreamWriter(filename))
             {
                 foreach (Contact entry in contacts)
@@ -517,7 +534,6 @@ public class ContactBookF
                     sw.WriteLine(entry.lastName);
                     sw.WriteLine(entry.phoneNumber);
                     sw.WriteLine(entry.email);
-
                 }
             }
 
@@ -529,12 +545,13 @@ public class ContactBookF
         }
     }
 
-
+    // Fusión y eliminación de contactos duplicados detectados
     public void MergeDuplicatedContacts()
     {
         Console.Clear();
         Console.WriteLine("### Merge & Deduplicate Contacts ###\n");
 
+        // Obtiene grupos de contactos duplicados
         var duplicateGroups = FindDuplicatedContacts();
 
         if (duplicateGroups == null || duplicateGroups.Count == 0)
@@ -549,23 +566,25 @@ public class ContactBookF
         bool changesMade = false;
         int groupNumber = 1;
 
+        // Procesa cada grupo de duplicados
         foreach (var group in duplicateGroups)
         {
             Console.WriteLine($"--- Duplicate Group #{groupNumber} ---");
 
-
+            // Muestra los contactos dentro del grupo
             for (int i = 0; i < group.Count; i++)
             {
                 var c = group[i];
                 Console.WriteLine($"[{i}] {c.firstName} {c.lastName}, {c.phoneNumber}, {c.email}");
             }
 
-
+            // Solicita al usuario elegir qué campo conservar para el contacto fusionado
             string mergedFirstName = AskUserToPickField("First Name", group.Select(e => e.firstName).ToList());
             string mergedLastName = AskUserToPickField("Last Name", group.Select(e => e.lastName).ToList());
             string mergedPhone = AskUserToPickField("Phone Number", group.Select(e => e.phoneNumber).ToList());
             string mergedEmail = AskUserToPickField("Email", group.Select(e => e.email).ToList());
 
+            // Crea nuevo contacto fusionado con los campos elegidos
             Contact mergedEntry = new Contact
             {
                 firstName = mergedFirstName,
@@ -577,6 +596,7 @@ public class ContactBookF
             Console.WriteLine("\nNew merged contact preview:");
             Console.WriteLine($"{mergedEntry.firstName} {mergedEntry.lastName}, {mergedEntry.phoneNumber}, {mergedEntry.email}");
 
+            // Confirma si desea agregar el contacto fusionado
             Console.Write("Add this merged contact? [y/n]: ");
             string confirmMerge = Console.ReadLine().Trim().ToLower();
 
@@ -591,9 +611,9 @@ public class ContactBookF
                 Console.WriteLine("Merge canceled.");
             }
 
-
             var toDelete = new List<Contact>();
 
+            // Permite seleccionar cuáles contactos duplicados eliminar
             Console.WriteLine("\nSelect contacts to delete from the original duplicates:");
 
             for (int i = 0; i < group.Count; i++)
@@ -608,6 +628,7 @@ public class ContactBookF
                 }
             }
 
+            // Elimina los contactos seleccionados
             foreach (var c in toDelete)
             {
                 contacts.Remove(c);
@@ -625,6 +646,8 @@ public class ContactBookF
 
         PressEnterToContinue();
     }
+
+    // Busca y devuelve listas de contactos que se consideran duplicados
     private List<List<Contact>> FindDuplicatedContacts()
     {
         var result = new List<List<Contact>>();
@@ -644,6 +667,7 @@ public class ContactBookF
 
                 var compare = contacts[j];
 
+                // Compara nombre, teléfono y correo para determinar duplicados
                 bool sameName = !string.IsNullOrWhiteSpace(current.firstName) &&
                                 !string.IsNullOrWhiteSpace(current.lastName) &&
                                 string.Equals(current.firstName, compare.firstName, StringComparison.OrdinalIgnoreCase) &&
@@ -662,6 +686,7 @@ public class ContactBookF
                 }
             }
 
+            // Si hay más de un contacto, es un grupo de duplicados
             if (group.Count > 1)
             {
                 foreach (var idx in groupIndexes)
@@ -671,31 +696,34 @@ public class ContactBookF
             }
         }
 
-
         return result.Count > 0 ? result : null;
     }
 
-
+    // Permite al usuario elegir un valor para un campo específico de una lista de opciones
     private string AskUserToPickField(string fieldName, List<string> options)
     {
+        // Filtra opciones vacías y duplica sólo valores únicos
         options = options.Where(opt => !string.IsNullOrWhiteSpace(opt)).Distinct().ToList();
 
         if (options.Count == 0) return "";
 
         if (options.Count == 1) return options[0];
 
+        // Muestra las opciones disponibles para el campo
         Console.WriteLine($"\nChoose {fieldName}:");
         for (int i = 0; i < options.Count; i++)
         {
             Console.WriteLine($"[{i}] {options[i]}");
         }
 
+        // Solicita al usuario seleccionar la opción preferida
         int choice = GetOption($"Select the preferred {fieldName}: ", 0, options.Count - 1);
         return options[choice];
     }
+
+    // Pregunta al usuario si desea salir del programa y actúa en consecuencia
     public bool Exit()
     {
-
         string answer = GetOption("Are you sure that you want to exit from the program? [y/n]", "Y", "N");
         if (answer == "Y")
         {
@@ -709,15 +737,17 @@ public class ContactBookF
         }
     }
 
+    // Pausa la ejecución hasta que el usuario presione ENTER
     public void PressEnterToContinue()
     {
         Console.Write("Press ENTER to continue.");
         while (Console.ReadKey(true).Key != ConsoleKey.Enter) ;
         Console.Clear();
     }
+
+    // Lee y valida una opción numérica dentro de un rango
     private int GetOption(string prompt, int min, int max)
     {
-
         Console.Write(prompt);
         string input = Console.ReadLine().Trim();
         int option;
@@ -730,6 +760,7 @@ public class ContactBookF
         return option;
     }
 
+    // Lee y valida una opción textual entre las permitidas (case-insensitive)
     private string GetOption(string prompt, params string[] validOptions)
     {
         string option;
